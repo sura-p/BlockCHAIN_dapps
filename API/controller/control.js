@@ -1,9 +1,8 @@
 const database = require('../database/dataconnection');
 const web3 = require('../web3/index')
-const model = require('../models/model');
  const main = async (req,res)=>{
 
-    lAddres = await web3.main();
+    lAddres = await web3.main(req.body.name);
     res.send(lAddres);
     
 
@@ -68,13 +67,20 @@ const burnT= async (req,res) =>{
     res.send(balance)
 }
 const transfere = async (req,res)=>{
+    const from = (req.body.from).toString();
     const to = (req.body.to).toString();
    
     const value = req.body.value; 
-    const transfering = await web3.transfer1(to,value);
+    console.log(from);
+    const transfering = await web3.transfer1(from,to,value);
     res.send(transfering);
-    return transfering ;
 }
+const changeOwner = async (req,res)=>{
+        const from = (req.body.newowner).toString();
+        const transfering = await web3._change_owner(from);
+        res.send(transfering);
+    }
 
 
-module.exports = {main ,account_connection,mint_token,checkbalance,approve,transfered,ckeckallowed,burnT,transfere};
+
+module.exports = {main ,account_connection,mint_token,checkbalance,approve,transfered,ckeckallowed,burnT,transfere,changeOwner};

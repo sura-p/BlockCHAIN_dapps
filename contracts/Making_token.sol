@@ -12,7 +12,7 @@ interface Token {
 
     function balanceOf(address _owner) external  returns (uint256 balance);
 
-    function transfer(address _to, uint256 _value)
+    function transfer(address _from ,address _to, uint256 _value)
         external
         returns (uint amount);
 
@@ -34,7 +34,7 @@ interface Token {
      event Transfer(address indexed _from, address indexed _to, uint256 _value);
      event Approval(address indexed _owner, address indexed _spender, uint256 _value);
      event bal(uint val);
-
+     event OwnerSet(address indexed oldOwner, address indexed newOwner);
    
 
 }
@@ -65,7 +65,7 @@ contract Making_token is Token {
         Tname ="rivh"; 
      Tdecimals = 10; 
       Tsymbol  ="RXB";
-     _totalSupply =5000;
+     _totalSupply =50000;
     balances[msg.sender]=_totalSupply;
         
         
@@ -102,16 +102,16 @@ contract Making_token is Token {
         return balances[_check_address];
     }
 
-    function transfer(address _to, uint256 _value)
+    function transfer(address _from , address _to, uint256 _value)
         public 
 
         override
         returns (uint amount)
     {
-        require(balances[msg.sender] >= _value);
-        balances[msg.sender] -= _value;
+        require(_value <= balances[_from],"not enough balance");
+        balances[_from] -= _value;
         balances[_to] += _value;
-        emit Transfer(msg.sender,_to, _value);
+        emit Transfer(_from,_to, _value);
         return _value;
     }
 
@@ -172,8 +172,11 @@ contract Making_token is Token {
            return true;
         }
 
-        function set(uint x, uint y) public pure returns(uint) {
-		return x + y;
-	}
+        function changeOwner(address newOwner) public Onlyowner returns(bool sucess){
+        
+        _owner = newOwner;
+        emit OwnerSet(_owner, newOwner);
+        return true;
+    }
 
 }

@@ -19,7 +19,7 @@
  */
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const mnemonic = 'artwork arm gym climb switch plug width grunt rebel crazy family mandate';
+const mnemonic = '438d1dc6ea8a8cc7ab751eaf7652735e70ba1d3fae3dbfdd65aa894ee5e00921';
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
@@ -74,9 +74,9 @@ module.exports = {
   },
 
   // Set default mocha options here, use special reporters etc.
-  mocha: {
-    // timeout: 100000
-  },
+  // mocha: {
+  //   // timeout: 100000
+  // },
 
   // Configure your compilers
   compilers: {
@@ -89,9 +89,9 @@ module.exports = {
       //    runs: 200
       //  },
       //  evmVersion: "byzantium"
-      // }
+      }
     }
-  },
+  
 
   // Truffle DB is currently disabled by default; to enable it, change enabled:
   // false to enabled: true. The default storage location can also be
@@ -113,4 +113,4 @@ module.exports = {
     //   }
     // }
   // }
-};
+}
