@@ -57,19 +57,14 @@ contract Making_token is Token {
 
 
     constructor(
-        // string memory _name,
-        // string memory _symbol,
-        // uint8 _decimal,
-    
     ) {
         Tname ="rivh"; 
      Tdecimals = 10; 
       Tsymbol  ="RXB";
-     _totalSupply =50000;
-    balances[msg.sender]=_totalSupply;
-        
-        
+     _totalSupply =5000;
+    balances[msg.sender]=_totalSupply;   
     }
+    
     function name() public override view returns (string memory ){
                 return Tname;
     }
@@ -178,5 +173,10 @@ contract Making_token is Token {
         emit OwnerSet(_owner, newOwner);
         return true;
     }
+
+
+}
+
+contract ICO is Making_token{
 
 }

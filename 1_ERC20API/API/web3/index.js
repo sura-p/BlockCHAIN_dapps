@@ -58,7 +58,7 @@ const check_balance = async (address1)=>{
       const recepit = await web3.eth.sendSignedTransaction(signature.rawTransaction);
     return recepit;
     
-    ;
+    
 }
 
 const approval = async (_to , _value) =>{
@@ -103,9 +103,24 @@ const transferFrom = async (_from,_to, _value) =>{
     
 }
 const _check_allowence = async (_owner,_spender)=>{
-   ;
-    const allowed = await deploying.methods.allowance(_owner,_spender).call({from:`${Aaddress[0]}`});
-    return allowed;
+    const allowed = await deploying.methods.allowance(_owner,_spender).encodeABI();
+    const nonce = await web3.eth.getTransactionCount('0xEE83dDe84627668DC4e68baf530557373B2f1Dbb');
+    const gasprice = await web3.eth.getGasPrice();
+    const tx= {
+      from: "0xEE83dDe84627668DC4e68baf530557373B2f1Dbb",
+      to: contract_Address,
+      gas: 3000000,
+      gasPrice:gasprice,
+      data:allowed,
+      nonce:nonce
+    }
+    
+    const signature = await web3.eth.accounts.signTransaction(tx,privatekey);
+    const recepit = await web3.eth.sendSignedTransaction(signature.rawTransaction);
+     console.log(recepit);
+     return recepit;
+    
+   
 }
 
 const burn  = async(amount)=>{
