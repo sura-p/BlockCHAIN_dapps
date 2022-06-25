@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.22 <=0.9.0;
 
+
+
 contract Supply_Chain {
+    enum State {ACCEPTED,DECLINED,INPROCESS ,DELIVERED}
+       State state =  State.DECLINED;
     struct Order {
         address manufactureradd;
         string part_type;
         string deliverOn;
         string orderdate;
+        string quantity;
     }
 
 
@@ -17,6 +22,7 @@ contract Supply_Chain {
         string serialno;
         uint256 price;
     }
+
     struct Product {
         address manufacturer;
         string serial_number;
@@ -25,9 +31,12 @@ contract Supply_Chain {
         bytes32[6] parts;
         uint256 price;
     }
+
     struct part_recepit{
         bytes32 orderhash;
+        address supplier;
         uint partPrice;
+        string parttype;
 
     }
     mapping(bytes32=>part_recepit) public part_detail;
@@ -39,6 +48,10 @@ event paymentDone(address reciver,address sender,uint256 amount,bytes32);
 modifier onlymanufacturer(bytes32 hash){
     
     require(order[hash].manufactureradd==msg.sender,"not the right manufacturer");
+    _;
+}
+modifier rightsupplier(bytes32 hash,address receiver){
+    require(part_detail[hash].supplier == receiver,"choose right supplier");
     _;
 }
 
@@ -70,7 +83,7 @@ modifier onlymanufacturer(bytes32 hash){
             b_full[j++] = b_s2[i];
         }
         for (i = 0; i < b_s3.length; i++) {
-            b_full[j++] = b_s3[i];
+            b_full[j++] = b_s2[i];
         }
         return keccak256(b_full);
     }
@@ -78,7 +91,8 @@ modifier onlymanufacturer(bytes32 hash){
     function create_order(
         string memory part_type,
         string memory deliverOn,
-        string memory orderdate
+        string memory orderdate,
+        string memory quantity
     ) public  returns (bytes32) {
 
         bytes32 order_hash = INFO_AND_HASH(
@@ -91,23 +105,29 @@ modifier onlymanufacturer(bytes32 hash){
             msg.sender,
             part_type,
             deliverOn,
-            orderdate
+            orderdate,
+            quantity
         );
 
         
        order[order_hash] = new_order;
         return order_hash;
     }
-//accessing the order
+function view_order(bytes32 orderhash) public view  returns (Order memory) {
+        return order[orderhash];
+    }
 
-    function get_order(bytes32 orderhash) public view returns (Order memory) {
+//accepting the order
+
+    function accept_order(bytes32 orderhash) public  returns (Order memory) {
+         state = State.ACCEPTED;
         return order[orderhash];
     }
 //making part after order recivied
     function make_part(bytes32 orderhash, string memory manufacturedate ,string memory serialno ,uint256 price)
         public
         returns (bytes32 partHash)
-    {
+    {    state = State.INPROCESS;
         bytes32 part_hash = INFO_AND_HASH(
             msg.sender,
             order[orderhash].part_type,
@@ -131,7 +151,9 @@ modifier onlymanufacturer(bytes32 hash){
 //after making part ,configuring part receipt
         function partrecepit(bytes32 orderhash,bytes32 partHash)public returns(bytes32){
             uint price = part[partHash].price;
-            part_recepit memory recepit = part_recepit(orderhash,price);
+            string memory parttype = part[partHash].part_type;
+            address supplier = part[partHash].supplier;
+            part_recepit memory recepit = part_recepit(orderhash,supplier,price, parttype);
             part_detail[orderhash]=recepit;
             return orderhash;
         }
@@ -141,9 +163,10 @@ modifier onlymanufacturer(bytes32 hash){
             return part_detail[orderhash];
         }
    //making payment to get part     
-        function getparts(address payable receiver,bytes32 orderh ) onlymanufacturer(orderh) payable external returns (bool) {
+        function getparts(address payable receiver,bytes32 orderh ) rightsupplier(orderh,receiver) onlymanufacturer(orderh) payable external returns (bool) {
         uint256 amount = msg.value;
-        require(part[orderh].price==amount,"supplier price not matched");
+        require(part_detail[orderh].partPrice==amount,"supplier price not matched");
+        
         receiver.transfer(amount);  
         emit paymentDone(receiver,msg.sender,msg.value,orderh);
         return true;
